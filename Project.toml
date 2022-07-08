@@ -1,13 +1,9 @@
 name = "Unitless"
 uuid = "c904d999-9673-4878-a3dd-e3ef1851788a"
 authors = ["Éric Thiébaut <eric.thiebaut@univ-lyon1.fr> and contributors"]
-version = "0.2.0"
-
-[deps]
-Requires = "ae029012-a4dd-5104-9daa-d747884805df"
+version = "0.3.0"
 
 [compat]
-Requires = "1.1"
 julia = "1"
 
 [extras]
