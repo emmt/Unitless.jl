@@ -7,7 +7,7 @@ yields the basic numerical type of its argument (a numerical value or type).
 
 ## Examples
 
-```jldoctest
+```julia
 julia> using Unitless
 
 julia> baretype(1)
