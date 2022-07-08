@@ -32,9 +32,8 @@ Examples:
 # unitless for values
 unitless(x::Real) = x
 unitless(x::Complex{<:Real}) = x
-# FIXME: this version is not needed because only Complex{<:Real} exists.
-unitless(x::Complex) = complex(unitless(real(x)), unitless(imag(x)))
 
+# catch errors
 unitless(x::T) where {T} = unsupported_type(T)
 
 # unitless for types
@@ -46,7 +45,11 @@ unitless(::Type{T}) where {T} = unsupported_type(T)
 unitless(x::Base.TwicePrecision) = Base.TwicePrecision(unitless(x.hi), unitless(x.lo))
 unitless(::Type{Base.TwicePrecision{T}}) where {T} = Base.TwicePrecision{unitless(T)}
 unitless(::Type{AbstractRange{T}}) where {T} = AbstractRange{unitless(T)}
-unitless(::Type{LinRange{T,L}}) where {T,L} = LinRange{unitless(T),L}
+@static if VERSION < v"1.7"
+    unitless(::Type{LinRange{T}}) where {T} = LinRange{unitless(T)}
+else
+    unitless(::Type{LinRange{T,L}}) where {T,L} = LinRange{unitless(T),L}
+end
 
 # unitless for arrays
 unitless(::Type{AbstractArray{T,N}}) where {T,N} = AbstractArray{unitless(T),N}
