@@ -30,8 +30,11 @@ Examples:
 """ unitless
 
 # unitless for values
-unitless(x::Complex{<:Real}) = x
 unitless(x::Real) = x
+unitless(x::Complex{<:Real}) = x
+# FIXME: this version is not needed because only Complex{<:Real} exists.
+unitless(x::Complex) = complex(unitless(real(x)), unitless(imag(x)))
+
 unitless(x::T) where {T} = unsupported_type(T)
 
 # unitless for types
@@ -39,7 +42,15 @@ unitless(::Type{Complex{T}}) where {T} = Complex{unitless(T)}
 unitless(::Type{T}) where {T<:Real} = T
 unitless(::Type{T}) where {T} = unsupported_type(T)
 
+# unitless for ranges
+unitless(x::Base.TwicePrecision) = Base.TwicePrecision(unitless(x.hi), unitless(x.lo))
+unitless(::Type{Base.TwicePrecision{T}}) where {T} = Base.TwicePrecision{unitless(T)}
+unitless(::Type{AbstractRange{T}}) where {T} = AbstractRange{unitless(T)}
+unitless(::Type{LinRange{T,L}}) where {T,L} = LinRange{unitless(T),L}
+
 # unitless for arrays
+unitless(::Type{AbstractArray{T,N}}) where {T,N} = AbstractArray{unitless(T),N}
+unitless(::Type{Array{T,N}}) where {T,N} = Array{unitless(T),N}
 unitless(A::AbstractArray) = _unitless(unitless(eltype(A)), A)
 _unitless(::Type{T}, A::AbstractArray{T}) where {T} = A
 function _unitless(::Type{T}, A::AbstractArray) where {T}
