@@ -4,49 +4,34 @@ using Unitless
 using Unitful
 using Test
 
-identical(a::AbstractArray, b::AbstractArray) = false
-identical(a::AbstractArray{T,N}, b::AbstractArray{T,N}) where {T,N} = (a == b)
-
 @testset "Basic types" begin
-    # unitless for values
-    @test unitless(1.0) === 1.0
-    @test unitless(Complex(2,3)) === Complex(2,3)
-    @test unitless(NaN) === NaN
-    @test unitless(π) === π
-    @test unitless(3//4) === 3//4
-    @test_throws ErrorException unitless("hello")
+    # baretype for values
+    @test baretype(1.0) === Float64
+    @test baretype(Complex(2,3)) === Complex{Int}
+    @test baretype(NaN) === typeof(NaN)
+    @test baretype(π) === typeof(π)
+    @test baretype(3//4) === typeof(3//4)
+    @test_throws ErrorException baretype("hello")
 
-    # unitless for types
-    @test unitless(Real) === Real
-    @test unitless(Integer) === Integer
-    @test unitless(Float32) === Float32
-    @test unitless(BigFloat) === BigFloat
-    @test unitless(Complex{Int}) === Complex{Int}
-    @test unitless(typeof(π)) === typeof(π)
-    @test unitless(typeof(3//4)) === typeof(3//4)
-    @test_throws ErrorException unitless(AbstractString)
-
-    # unitless for arrays
-    @test let A = [1.0];           unitless(A) === A; end
-    @test let A = [π];             unitless(A) === A; end
-    @test let A = [3//4];          unitless(A) === A; end
-    @test let A = [one(BigFloat)]; unitless(A) === A; end
-    @test let A = Real[2];         unitless(A) === A; end
-    @test_throws ErrorException unitless(["hello"])
+    # baretype for types
+    @test baretype(Real) === Real
+    @test baretype(Integer) === Integer
+    @test baretype(Float32) === Float32
+    @test baretype(BigFloat) === BigFloat
+    @test baretype(Complex{Int}) === Complex{Int}
+    @test baretype(typeof(π)) === typeof(π)
+    @test baretype(typeof(3//4)) === typeof(3//4)
+    @test_throws ErrorException baretype(AbstractString)
 end
 
 @testset "Unitful quantities" begin
-    # unitless for values
-    @test unitless(u"2.0m/s") === 2.0
-    @test unitless(u"35GHz") === 35
-    #@test unitless(Complex(u"2s",u"3s")) === Complex(2,3)
+    # baretype for values
+    @test baretype(u"2.0m/s") === Float64
+    @test baretype(u"35GHz") === Int
 
-    # unitless for types
-    @test unitless(typeof(u"2.0m/s")) === Float64
-    @test unitless(typeof(u"35GHz")) === Int
-
-    # unitless for arrays
-    @test let A = unitless([u"2.0m"]); identical(A, [2.0]); end
+    # baretype for types
+    @test baretype(typeof(u"2.0m/s")) === Float64
+    @test baretype(typeof(u"35GHz")) === Int
 end
 
 end # module UnitlessTests

@@ -5,72 +5,51 @@ Module `Unitless` is to strip units from quantities.
 """
 module Unitless
 
-export unitless
-
-using Requires
+export baretype
 
 """
-    unitless(x)
+    baretype(x)
 
-yields `x` converted to a basic numeric type.  Argument can be a value, a type,
-an array, etc.  Copy is avoided as much as possible.
+yields the basic numeric type of `x` which can be a numeric value or a numeric
+type.  This method is useful to strip units from quantities.
 
 Examples:
 
-    using Unitless
-    unitless(π)                # yields π
-    unitless(2.7)              # yields 2.7
-    unitless(3//4)             # yields 3//4
+```jldoctest
+julia> using Unitless
 
-    using Unitful
-    unitless(u"3km/s")         # yields 3
-    unitless(typeof(u"3km/s")) # yields Int
-    unitless([u"3km/s"])       # yields [3]
+julia> baretype(1)
+Int64
 
-""" unitless
+julia> baretype(-3.14f0)
+Float32
 
-# unitless for values
-unitless(x::Real) = x
-unitless(x::Complex{<:Real}) = x
+julia> baretype(π)
+Irrational{:π}
 
-# catch errors
-unitless(x::T) where {T} = unsupported_type(T)
+julia> baretype(sqrt(π))
+Float64
 
-# unitless for types
-unitless(::Type{Complex{T}}) where {T} = Complex{unitless(T)}
-unitless(::Type{T}) where {T<:Real} = T
-unitless(::Type{T}) where {T} = unsupported_type(T)
+julia> baretype(1 + 0im)
+Complex{Int64}
 
-# unitless for ranges
-unitless(x::Base.TwicePrecision) = Base.TwicePrecision(unitless(x.hi), unitless(x.lo))
-unitless(::Type{Base.TwicePrecision{T}}) where {T} = Base.TwicePrecision{unitless(T)}
-unitless(::Type{AbstractRange{T}}) where {T} = AbstractRange{unitless(T)}
-@static if VERSION < v"1.7"
-    unitless(::Type{LinRange{T}}) where {T} = LinRange{unitless(T)}
-else
-    unitless(::Type{LinRange{T,L}}) where {T,L} = LinRange{unitless(T),L}
-end
+julia> using Unitful
 
-# unitless for arrays
-unitless(::Type{AbstractArray{T,N}}) where {T,N} = AbstractArray{unitless(T),N}
-unitless(::Type{Array{T,N}}) where {T,N} = Array{unitless(T),N}
-unitless(A::AbstractArray) = _unitless(unitless(eltype(A)), A)
-_unitless(::Type{T}, A::AbstractArray{T}) where {T} = A
-function _unitless(::Type{T}, A::AbstractArray) where {T}
-    B = similar(A, T)
-    @inbounds @simd for i in eachindex(A, B)
-        B[i] = unitless(A[i])
-    end
-    return B
-end
+julia> baretype(u"3km/s")
+Int64
 
-@noinline unsupported_type(T) = error("unknown basic numeric type for `$T`")
+julia> baretype(u"3.2km/s")
+Float64
 
-function __init__()
-    @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" begin
-        unitless(x::Unitful.Quantity) = unitless(x.val)
-        unitless(::Type{<:Unitful.AbstractQuantity{T}}) where {T} = unitless(T)
-    end
-end
+julia> baretype(typeof(u"2.1GHz"))
+Float64
+```
+
+"""
+baretype(x::T) where {T} = baretype(T)
+baretype(::Type{T}) where {T<:Real} = T
+baretype(::Type{T}) where {T<:Complex} = T
+baretype(::Type{T}) where {T<:Number} = typeof(one(T))
+@noinline baretype(T::DataType) = error("unknown basic numeric type for `$T`")
 
 end # module Unitless
