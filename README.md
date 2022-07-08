@@ -35,12 +35,6 @@ Float64
 
 julia> baretype(typeof(u"2.1GHz"))
 Float64
-
-`baretype` is a no-op for arguments with basic numeric types.  For example:
-
-```jldoctest
-julia> range(1, length=100)
-1:100
 ```
 
 
