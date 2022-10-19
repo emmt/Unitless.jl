@@ -5,7 +5,12 @@ Module `Unitless` is to strip units from quantities.
 """
 module Unitless
 
-export baretype
+export
+    baretype,
+    convert_baretype,
+    promote_baretype
+
+using Requires
 
 """
     baretype(x)
@@ -51,5 +56,34 @@ baretype(::Type{T}) where {T<:Real} = T
 baretype(::Type{T}) where {T<:Complex} = T
 baretype(::Type{T}) where {T<:Number} = typeof(one(T))
 @noinline baretype(T::DataType) = error("unknown basic numeric type for `$T`")
+
+"""
+    convert_baretype(T, x)
+
+converts `x` so that its basic numeric type is the same as that of type `T`.
+
+"""
+convert_baretype(::Type{T}, x) where {T} = _convert_baretype(baretype(T), x)
+
+# Private method `_convert_baretype` is called by `convert_baretype` with a
+# first argument that is guaranteed to be a basic numeric type.
+_convert_baretype(::Type{T}, x::T) where {T} = x
+_convert_baretype(::Type{T}, x) where {T} = convert(T, x)
+
+"""
+    promote_baretype(args...) -> T
+
+yields the type `T` resulting from promoting the basic numeric types of
+`args...`.
+
+"""
+promote_baretype() = promote_type()
+promote_baretype(a) = baretype(a)
+promote_baretype(a, b) = promote_type(baretype(a), baretype(b))
+@inline promote_baretype(args...) = promote_type(map(baretype, args)...)
+
+function __init__()
+    @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" include("with_unitful.jl")
+end
 
 end # module Unitless
