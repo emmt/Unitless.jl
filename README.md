@@ -7,11 +7,11 @@ such as [`Unitful`](https://github.com/PainterQubits/Unitful.jl) are loaded.
 
 The `Unitless` package exports a few methods:
 
-* `baretype(x)` which yields the basic numerical type of `x` (a numerical value
-  or type). If this method is not extended for a specific type, the fallback
+* `baretype(x)` which yields the basic numeric type of `x` (a numeric value or
+  type). If this method is not extended for a specific type, the fallback
   implementation yiedls `typeof(one(x))`.
 
-* `convert_baretype(T,x)` which converts the basic numerical type of `x` to the
+* `convert_baretype(T,x)` which converts the basic numeric type of `x` to the
   basic numeric type of `T` while preserving the units of `x` if any.
 
 * `promote_baretype(args...)` which yields the type resulting from promoting
