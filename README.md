@@ -76,19 +76,9 @@ created to share this need.
 
 ## Installation
 
-The `Unitless` package can be installed as:
+`Unitless` can be installed as any other official Julia packages. For example:
 
 ```julia
 using Pkg
-pkg"add https://github.com/emmt/Unitless.jl"
-```
-
-You may also consider using [my custom
-registry](https://github.com/emmt/EmmtRegistry):
-
-```julia
-using Pkg
-pkg"registry add General" # if no general registry has been installed yet
-pkg"registry add https://github.com/emmt/EmmtRegistry" # if not yet added
 pkg"add Unitless"
 ```
