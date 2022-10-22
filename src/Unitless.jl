@@ -55,7 +55,9 @@ baretype(x::T) where {T} = baretype(T)
 baretype(::Type{T}) where {T<:Real} = T
 baretype(::Type{T}) where {T<:Complex} = T
 baretype(::Type{T}) where {T<:Number} = typeof(one(T))
-@noinline baretype(T::DataType) = error("unknown basic numeric type for `$T`")
+
+# Catch errors.
+@noinline baretype(T::Type) = error("unknown bare numeric type for `$T`")
 
 """
     convert_baretype(T, x)
