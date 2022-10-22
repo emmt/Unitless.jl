@@ -3,21 +3,21 @@
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](./LICENSE.md) [![Build Status](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml?query=branch%3Amain) [![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/Unitless.jl?svg=true)](https://ci.appveyor.com/project/emmt/Unitless-jl) [![Coverage](https://codecov.io/gh/emmt/Unitless.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/Unitless.jl)
 
 `Unitless` is a small [Julia](https://julialang.org/) package to deal with the
-basic numeric type of values whatever their units. The intention is that
+bare numeric type of values whatever their units. The intention is that
 `Unitless` package automatically extends its exported methods when packages
 such as [`Unitful`](https://github.com/PainterQubits/Unitful.jl) are loaded.
 
 The `Unitless` package exports a few methods:
 
-* `baretype(x)` which yields the basic numeric type of `x` (a numeric value or
-  type). If this method is not extended for a specific type, the fallback
-  implementation yiedls `typeof(one(x))`.
+* `baretype(x)` yields the bare numeric type of `x` (a numeric value or type).
+  If this method is not extended for a specific type, the fallback
+  implementation yields `typeof(one(x))`.
 
-* `convert_baretype(T,x)` which converts the basic numeric type of `x` to the
-  basic numeric type of `T` while preserving the units of `x` if any.
+* `baretype(args...)` yields the type resulting from promoting
+  the bare numeric types of `args...`.
 
-* `promote_baretype(args...)` which yields the type resulting from promoting
-  the basic numeric types of `args...`.
+* `convert_baretype(T,x)` converts the bare numeric type of `x` to the bare
+  numeric type of `T` while preserving the units of `x` if any.
 
 
 ## Examples
@@ -72,8 +72,8 @@ end
 This seemingly very specific case was in fact the key point to allow for
 packages such as [LazyAlgebra](https://github.com/emmt/LazyAlgebra.jl) or
 [LinearInterpolators](https://github.com/emmt/LinearInterpolators.jl) to work
-seamlessly on arrays whose entries have units. The `Unitless` package was
-created to share this need.
+seamlessly on arrays whose entries may have units. The `Unitless` package was
+created to cover this need.
 
 
 ## Installation

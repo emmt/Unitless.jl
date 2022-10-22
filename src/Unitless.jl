@@ -7,16 +7,16 @@ module Unitless
 
 export
     baretype,
-    convert_baretype,
-    promote_baretype
+    convert_baretype
 
 using Requires
 
 """
     baretype(x)
 
-yields the basic numeric type of `x` which can be a numeric value or a numeric
-type.  This method is useful to strip units from quantities.
+yields the bare numeric type of `x` which can be a numeric value or type (that
+is an instance or a sub-type of `Number`). This method is useful to strip units
+from quantities.
 
 Examples:
 
@@ -60,29 +60,30 @@ baretype(::Type{T}) where {T<:Number} = typeof(one(T))
 @noinline baretype(T::Type) = error("unknown bare numeric type for `$T`")
 
 """
+    baretype(args...)
+
+yields the promoted bare numeric type of `args...`.
+
+"""
+baretype(a, b) = promote_type(baretype(a), baretype(b))
+baretype(a, b, c) = promote_type(baretype(a), baretype(b), baretype(c))
+@inline baretype(a, b, c...) =
+    promote_type(baretype(a), baretype(b), map(baretype, c)...)
+
+@deprecate promote_baretype(args...) baretype(args...)
+
+"""
     convert_baretype(T, x)
 
-converts `x` so that its basic numeric type is the same as that of type `T`.
+converts `x` so that its bare numeric type is the same as that of type `T`.
 
 """
 convert_baretype(::Type{T}, x) where {T} = _convert_baretype(baretype(T), x)
 
 # Private method `_convert_baretype` is called by `convert_baretype` with a
-# first argument that is guaranteed to be a basic numeric type.
+# first argument that is guaranteed to be a bare numeric type.
 _convert_baretype(::Type{T}, x::T) where {T} = x
 _convert_baretype(::Type{T}, x) where {T} = convert(T, x)
-
-"""
-    promote_baretype(args...) -> T
-
-yields the type `T` resulting from promoting the basic numeric types of
-`args...`.
-
-"""
-promote_baretype() = promote_type()
-promote_baretype(a) = baretype(a)
-promote_baretype(a, b) = promote_type(baretype(a), baretype(b))
-@inline promote_baretype(args...) = promote_type(map(baretype, args)...)
 
 function __init__()
     @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" include("with_unitful.jl")

@@ -7,6 +7,7 @@ using Test
 @testset "Basic types" begin
     # baretype for values
     @test baretype(1.0) === Float64
+    @test baretype(Float32) === Float32
     @test baretype(Complex(2,3)) === Complex{Int}
     @test baretype(NaN) === typeof(NaN)
     @test baretype(π) === typeof(π)
@@ -23,18 +24,17 @@ using Test
     @test baretype(typeof(3//4)) === typeof(3//4)
     @test_throws ErrorException baretype(AbstractString)
 
-    # promote_baretype
-    @test promote_baretype() === promote_type()
-    @test promote_baretype(Float32) === Float32
-    @test promote_baretype(0.1) === Float64
-    @test promote_baretype(1, 0f0) === Float32
-    @test promote_baretype(Int, pi) === promote_type(Int, typeof(pi))
-    @test promote_baretype(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
-    @test promote_baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
+    # baretype with multiple arguments
+    @test (@test_deprecated promote_baretype(1, 0f0)) === Float32
+    @test baretype(1, 0f0) === Float32
+    @test baretype(Int, pi) === promote_type(Int, typeof(pi))
+    @test baretype(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
+    @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
 
     # convert_baretype
     @test convert_baretype(Int, -1) === -1
     @test convert_baretype(Int, 2.0) === 2
+    @test convert_baretype(Float32, 2.0) === 2.0f0
 end
 
 @testset "Unitful quantities" begin
@@ -46,12 +46,9 @@ end
     @test baretype(typeof(u"2.0m/s")) === Float64
     @test baretype(typeof(u"35GHz")) === Int
 
-    # promote_baretype
-    @test promote_baretype() === promote_type()
-    @test promote_baretype(u"2.0m/s") === Float64
-    @test promote_baretype(u"35GHz") === Int
-    @test promote_baretype(u"2.0m/s", u"35GHz") === Float64
-    @test promote_baretype(1, u"2.0m/s", u"35GHz") === Float64
+    # baretype with multiple arguments
+    @test baretype(u"2.0m/s", u"35GHz") === Float64
+    @test baretype(1, u"2.0f0m/s", u"35GHz") === Float32
 
     # convert_baretype
     @test convert_baretype(Int, u"2.0m/s") === u"2m/s"
