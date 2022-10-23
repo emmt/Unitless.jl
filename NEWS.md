@@ -1,5 +1,9 @@
 # User visible changes in `Unitless`
 
+## Version 2.0.0
+
+- Rename `baretype` as `bare_type`.
+
 ## Version 1.3.0
 
 - Rename `Unitless.BareType` as `Unitless.BareNumber`.

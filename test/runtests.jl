@@ -13,62 +13,61 @@ Base.oneunit(::Type{MyNumber{T}}) where {T} = MyNumber{T}(one(T))
 Base.one(::Type{MyNumber{T}}) where {T} = one(T)
 
 @testset "Basic types" begin
-    # baretype for values
-    @test baretype(1.0) === Float64
-    @test baretype(Float32) === Float32
-    @test baretype(Complex(2,3)) === Complex{Int}
-    @test baretype(NaN) === typeof(NaN)
-    @test baretype(π) === typeof(π)
-    @test baretype(3//4) === typeof(3//4)
-    @test_throws ErrorException baretype("hello")
+    # bare_type for values
+    @test bare_type(1.0) === Float64
+    @test bare_type(Float32) === Float32
+    @test bare_type(Complex(2,3)) === Complex{Int}
+    @test bare_type(NaN) === typeof(NaN)
+    @test bare_type(π) === typeof(π)
+    @test bare_type(3//4) === typeof(3//4)
+    @test_throws ErrorException bare_type("hello")
 
-    # baretype for types
-    @test baretype(Real) === Real
-    @test baretype(Integer) === Integer
-    @test baretype(Float32) === Float32
-    @test baretype(BigFloat) === BigFloat
-    @test baretype(Complex{Int}) === Complex{Int}
-    @test baretype(typeof(π)) === typeof(π)
-    @test baretype(typeof(3//4)) === typeof(3//4)
-    @test_throws ErrorException baretype(AbstractString)
+    # bare_type for types
+    @test bare_type(Real) === Real
+    @test bare_type(Integer) === Integer
+    @test bare_type(Float32) === Float32
+    @test bare_type(BigFloat) === BigFloat
+    @test bare_type(Complex{Int}) === Complex{Int}
+    @test bare_type(typeof(π)) === typeof(π)
+    @test bare_type(typeof(3//4)) === typeof(3//4)
+    @test_throws ErrorException bare_type(AbstractString)
 
-    # baretype with multiple arguments
-    @test (@test_deprecated promote_baretype(1, 0f0)) === Float32
-    @test baretype(1, 0f0) === Float32
-    @test baretype(Int, pi) === promote_type(Int, typeof(pi))
-    @test baretype(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
-    @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
-    @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
-    @test baretype(Int, Int8, Int16, Float32) === promote_type(Int, Int8, Int16, Float32)
+    # bare_type with multiple arguments
+    @test bare_type(1, 0f0) === Float32
+    @test bare_type(Int, pi) === promote_type(Int, typeof(pi))
+    @test bare_type(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
+    @test bare_type(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
+    @test bare_type(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
+    @test bare_type(Int, Int8, Int16, Float32) === promote_type(Int, Int8, Int16, Float32)
 
     # default implementation
-    @test baretype(MyNumber(1.2f0)) === Float32
-    @test baretype(MyNumber{Int16}) === Int16
+    @test bare_type(MyNumber(1.2f0)) === Float32
+    @test bare_type(MyNumber{Int16}) === Int16
 
-    # convert_baretype
-    @test convert_baretype(Int, -1) === -1
-    @test convert_baretype(Int, 2.0) === 2
-    @test convert_baretype(Float32, 2.0) === 2.0f0
-    @test convert_baretype(MyNumber{Int16}, 12.0) === Int16(12)
+    # convert_bare_type
+    @test convert_bare_type(Int, -1) === -1
+    @test convert_bare_type(Int, 2.0) === 2
+    @test convert_bare_type(Float32, 2.0) === 2.0f0
+    @test convert_bare_type(MyNumber{Int16}, 12.0) === Int16(12)
 end
 
 @testset "Unitful quantities" begin
-    # baretype for values
-    @test baretype(u"2.0m/s") === Float64
-    @test baretype(u"35GHz") === Int
+    # bare_type for values
+    @test bare_type(u"2.0m/s") === Float64
+    @test bare_type(u"35GHz") === Int
 
-    # baretype for types
-    @test baretype(typeof(u"2.0m/s")) === Float64
-    @test baretype(typeof(u"35GHz")) === Int
+    # bare_type for types
+    @test bare_type(typeof(u"2.0m/s")) === Float64
+    @test bare_type(typeof(u"35GHz")) === Int
 
-    # baretype with multiple arguments
-    @test baretype(u"2.0m/s", u"35GHz") === Float64
-    @test baretype(1, u"2.0f0m/s", u"35GHz") === Float32
+    # bare_type with multiple arguments
+    @test bare_type(u"2.0m/s", u"35GHz") === Float64
+    @test bare_type(1, u"2.0f0m/s", u"35GHz") === Float32
 
-    # convert_baretype
-    @test convert_baretype(Float64, u"2.0m/s") === u"2.0m/s"
-    @test convert_baretype(Int, u"2.0m/s") === u"2m/s"
-    @test convert_baretype(Float32, u"35GHz") === u"35.0f0GHz"
+    # convert_bare_type
+    @test convert_bare_type(Float64, u"2.0m/s") === u"2.0m/s"
+    @test convert_bare_type(Int, u"2.0m/s") === u"2m/s"
+    @test convert_bare_type(Float32, u"35GHz") === u"35.0f0GHz"
 end
 
 end # module UnitlessTests
