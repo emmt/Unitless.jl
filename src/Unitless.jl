@@ -93,7 +93,20 @@ convert_baretype(::Type{T}, x) where {T<:BareType} = convert(T, x)
 convert_baretype(::Type{T}, x) where {T} = convert_baretype(baretype(T), x)
 
 function __init__()
-    @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" include("with_unitful.jl")
+    # Extend methods to `Unitful` quantities when this package is loaded.
+    @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" begin
+        function baretype(::Type{<:Unitful.AbstractQuantity{T}}) where {T}
+            return baretype(T)
+        end
+        function convert_baretype(::Type{T},
+                                  x::Unitful.AbstractQuantity{T}) where {T<:BareType}
+            return x
+        end
+        @inline function convert_baretype(::Type{T},
+                                          x::Unitful.AbstractQuantity) where {T<:BareType}
+            return convert(T, Unitful.ustrip(x))*Unitful.unit(x)
+        end
+    end
 end
 
 end # module Unitless
