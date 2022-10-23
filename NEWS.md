@@ -7,6 +7,10 @@ Breaking changes compared to version 1:
 
 New features:
 - `bare_type()` with no arguments yields `Unitless.BareNumber`.
+- `real_type` and `convert_real_type` which work like `bare_type` and
+  `convert_bare_type` except for complex numbers or numeric types for which the
+  bare real type backing the storage of the real and imaginary parts is
+  considered.
 - `unitless(x)` yields `x` without its units if any. `x` may be a number or a
   numeric type.
 

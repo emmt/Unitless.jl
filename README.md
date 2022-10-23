@@ -19,13 +19,25 @@ The `Unitless` package exports a few methods:
   implementation yields `typeof(one(x))`. With more than one argument,
   `bare_type(args...)` yields the type resulting from promoting the bare
   numeric types of `args...`. With no argument, `bare_type()` yields
-  `Unitless.BareNumber` the union of bare numeric types.
+  `Unitless.BareNumber` the union of bare numeric types that may be returned by
+  this method.
+
+* `real_type(x)` yields the bare real type of `x` (a numeric value or type). If
+  this method is not extended for a specific type, the fallback implementation
+  yields `typeof(one(real(x))`. With more than one argument,
+  `real_type(args...)` yields the type resulting from promoting the bare real
+  types of `args...`. With no argument, `real_type()` yields `Real` the
+  super-type of types that may be returned by this method.
 
 * `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
   numeric type of `T` while preserving the units of `x` if any.
 
+* `convert_real_type(T,x)` converts the bare real type of `x` to the bare real
+  type of `T` while preserving the units of `x` if any.
+
 * `unitless(x)` yields `x` without its units, if any. `x` can be a number or a
   numeric type. In the latter case, `unitless` behaves like `bare_type`.
+
 
 ## Examples
 
