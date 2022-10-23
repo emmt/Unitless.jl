@@ -20,7 +20,7 @@ is the union of bare numeric types, that is `Real` or `Complex`.
 const BareType = Union{Real,Complex}
 
 """
-    baretype(x)
+    baretype(x) -> T <: Union{Real,Complex}
 
 yields the bare numeric type of `x` which can be a numeric value or type (that
 is an instance or a sub-type of `Number`). This method is useful to strip units
