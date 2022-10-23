@@ -78,8 +78,6 @@ bare_type(a, b, c) = promote_type(bare_type(a), bare_type(b), bare_type(c))
 @inline bare_type(a, b, c...) =
     promote_type(bare_type(a), bare_type(b), map(bare_type, c)...)
 
-@deprecate promote_bare_type(args...) bare_type(args...)
-
 """
     convert_bare_type(T, x)
 
