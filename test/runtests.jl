@@ -4,6 +4,14 @@ using Unitless
 using Unitful
 using Test
 
+struct MyNumber{T<:Number} <: Number
+    val::T
+end
+
+Base.zero(::Type{MyNumber{T}}) where {T} = MyNumber{T}(zero(T))
+Base.oneunit(::Type{MyNumber{T}}) where {T} = MyNumber{T}(one(T))
+Base.one(::Type{MyNumber{T}}) where {T} = one(T)
+
 @testset "Basic types" begin
     # baretype for values
     @test baretype(1.0) === Float64
@@ -31,6 +39,10 @@ using Test
     @test baretype(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
     @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
 
+    # default implementation
+    @test baretype(MyNumber(1.2f0)) === Float32
+    @test baretype(MyNumber{Int16}) === Int16
+
     # convert_baretype
     @test convert_baretype(Int, -1) === -1
     @test convert_baretype(Int, 2.0) === 2
@@ -51,6 +63,7 @@ end
     @test baretype(1, u"2.0f0m/s", u"35GHz") === Float32
 
     # convert_baretype
+    @test convert_baretype(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_baretype(Int, u"2.0m/s") === u"2m/s"
     @test convert_baretype(Float32, u"35GHz") === u"35.0f0GHz"
 end
