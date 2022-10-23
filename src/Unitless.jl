@@ -12,12 +12,12 @@ export
 using Requires
 
 """
-    Unitless.BareType
+    Unitless.BareNumber
 
 is the union of bare numeric types, that is `Real` or `Complex`.
 
 """
-const BareType = Union{Real,Complex}
+const BareNumber = Union{Real,Complex}
 
 """
     baretype(x) -> T <: Union{Real,Complex}
@@ -60,7 +60,7 @@ Float64
 
 """
 baretype(x::T) where {T} = baretype(T)
-baretype(::Type{T}) where {T<:BareType} = T
+baretype(::Type{T}) where {T<:BareNumber} = T
 baretype(::Type{T}) where {T<:Number} = typeof(one(T))
 
 # Catch errors.
@@ -84,12 +84,12 @@ baretype(a, b, c) = promote_type(baretype(a), baretype(b), baretype(c))
 
 converts `x` so that its bare numeric type is the same as that of type `T`.
 
-This method may be extended with `T<:Unitless.BareType` and for `x` being of
+This method may be extended with `T<:Unitless.BareNumber` and for `x` being of
 non-standard numeric type.
 
 """
-convert_baretype(::Type{T}, x::T) where {T<:BareType} = x
-convert_baretype(::Type{T}, x) where {T<:BareType} = convert(T, x)
+convert_baretype(::Type{T}, x::T) where {T<:BareNumber} = x
+convert_baretype(::Type{T}, x) where {T<:BareNumber} = convert(T, x)
 convert_baretype(::Type{T}, x) where {T} = convert_baretype(baretype(T), x)
 
 function __init__()
@@ -99,11 +99,11 @@ function __init__()
             return baretype(T)
         end
         function convert_baretype(::Type{T},
-                                  x::Unitful.AbstractQuantity{T}) where {T<:BareType}
+                                  x::Unitful.AbstractQuantity{T}) where {T<:BareNumber}
             return x
         end
         @inline function convert_baretype(::Type{T},
-                                          x::Unitful.AbstractQuantity) where {T<:BareType}
+                                          x::Unitful.AbstractQuantity) where {T<:BareNumber}
             return convert(T, Unitful.ustrip(x))*Unitful.unit(x)
         end
     end
