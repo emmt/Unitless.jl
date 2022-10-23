@@ -11,6 +11,7 @@ end
 Base.zero(::Type{MyNumber{T}}) where {T} = MyNumber{T}(zero(T))
 Base.oneunit(::Type{MyNumber{T}}) where {T} = MyNumber{T}(one(T))
 Base.one(::Type{MyNumber{T}}) where {T} = one(T)
+Unitless.unitless(x::MyNumber) = getfield(x,:val)
 
 @testset "Basic types" begin
     # bare_type with no argument
@@ -52,6 +53,25 @@ Base.one(::Type{MyNumber{T}}) where {T} = one(T)
     @test convert_bare_type(Int, 2.0) === 2
     @test convert_bare_type(Float32, 2.0) === 2.0f0
     @test convert_bare_type(MyNumber{Int16}, 12.0) === Int16(12)
+
+    # unitless
+    @test unitless(Real) === bare_type(Real)
+    @test unitless(Integer) === bare_type(Integer)
+    @test unitless(Float32) === bare_type(Float32)
+    @test unitless(BigFloat) === bare_type(BigFloat)
+    @test unitless(Complex{Int}) === bare_type(Complex{Int})
+    @test unitless(typeof(3//4)) === bare_type(typeof(3//4))
+    @test unitless(typeof(π)) === bare_type(typeof(π))
+    @test unitless(17.0) === 17.0
+    @test unitless(17.0f0) === 17.0f0
+    @test unitless(17) === 17
+    @test unitless(Int16(17)) === Int16(17)
+    @test unitless(true) === true
+    @test unitless(false) === false
+    @test unitless(3//4) === 3//4
+    @test unitless(π) === π
+    @test unitless(MyNumber(1.2f0)) === 1.2f0
+    @test unitless(MyNumber{Int16}) === Int16
 end
 
 @testset "Unitful quantities" begin
@@ -71,6 +91,10 @@ end
     @test convert_bare_type(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_bare_type(Int, u"2.0m/s") === u"2m/s"
     @test convert_bare_type(Float32, u"35GHz") === u"35.0f0GHz"
+
+    # unitless
+    @test unitless(u"17GHz") === 17
+    @test unitless(typeof(u"2.0f0m/s")) === Float32
 end
 
 end # module UnitlessTests

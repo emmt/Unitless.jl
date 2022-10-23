@@ -2,10 +2,15 @@
 
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](./LICENSE.md) [![Build Status](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml?query=branch%3Amain) [![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/Unitless.jl?svg=true)](https://ci.appveyor.com/project/emmt/Unitless-jl) [![Coverage](https://codecov.io/gh/emmt/Unitless.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/Unitless.jl)
 
-`Unitless` is a small [Julia](https://julialang.org/) package to deal with the
-bare numeric type of values whatever their units. The intention is that
-`Unitless` package automatically extends its exported methods when packages
-such as [`Unitful`](https://github.com/PainterQubits/Unitful.jl) are loaded.
+`Unitless` is a small [Julia](https://julialang.org/) package to facilitate
+coding with numbers whether they have units or not. The package provides
+methods to strip units from numbers or numeric types, convert the numeric type
+of quantities (not their units), determine appropriate numeric type to carry
+computations mixing numbers with different types and/or units. These methods
+make it easy to write code that works consistently for numbers with any units
+(including none). The intention is that the `Unitless` package automatically
+extends its exported methods when packages such as
+[`Unitful`](https://github.com/PainterQubits/Unitful.jl) are loaded.
 
 The `Unitless` package exports a few methods:
 
@@ -19,6 +24,8 @@ The `Unitless` package exports a few methods:
 * `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
   numeric type of `T` while preserving the units of `x` if any.
 
+* `unitless(x)` yields `x` without its units, if any. `x` can be a number or a
+  numeric type. In the latter case, `unitless` behaves like `bare_type`.
 
 ## Examples
 
@@ -50,6 +57,12 @@ Float64
 
 julia> bare_type(typeof(u"2.1GHz"))
 Float64
+
+julia> unitless(typeof(u"2.1GHz"))
+Float64
+
+julia> unitless(u"2.1GHz")
+2.1
 ```
 
 

@@ -8,7 +8,8 @@ module Unitless
 
 export
     bare_type,
-    convert_bare_type
+    convert_bare_type,
+    unitless
 
 using Requires
 
@@ -99,20 +100,33 @@ convert_bare_type(::Type{T}, x::T) where {T<:BareNumber} = x
 convert_bare_type(::Type{T}, x) where {T<:BareNumber} = convert(T, x)
 convert_bare_type(::Type{T}, x) where {T} = convert_bare_type(bare_type(T), x)
 
+"""
+    unitless(x)
+
+yields `x` without its units if any. `x` may be a number or a numeric type. In
+the latter case, `unitless` behaves like `bare_type`.
+
+Compared to `ustrip` from the `Unitful` package, argument can be a numeric type
+and, of course, `unitless` only requires the lightweight `Unitless` package to
+be loaded.
+
+"""
+unitless(T::Type) = bare_type(T)
+unitless(x::BareNumber) = x
+
 function __init__()
     # Extend methods to `Unitful` quantities when this package is loaded.
     @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" begin
-        function bare_type(::Type{<:Unitful.AbstractQuantity{T}}) where {T}
-            return bare_type(T)
-        end
-        function convert_bare_type(::Type{T},
-                                   x::Unitful.AbstractQuantity{T}) where {T<:BareNumber}
-            return x
-        end
-        @inline function convert_bare_type(::Type{T},
-                                          x::Unitful.AbstractQuantity) where {T<:BareNumber}
-            return convert(T, Unitful.ustrip(x))*Unitful.unit(x)
-        end
+        # Extend bare_type.
+        bare_type(::Type{<:Unitful.AbstractQuantity{T}}) where {T} = bare_type(T)
+
+        # Extend convert_bare_type.
+        convert_bare_type(::Type{T}, x::Unitful.AbstractQuantity{T}) where {T<:BareNumber} = x
+        @inline convert_bare_type(::Type{T}, x::Unitful.AbstractQuantity) where {T<:BareNumber} =
+            convert(T, Unitful.ustrip(x))*Unitful.unit(x)
+
+        # Extend unitless (only needed for values).
+        unitless(x::Unitful.AbstractQuantity) = Unitful.ustrip(x)
     end
 end
 

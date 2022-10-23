@@ -2,8 +2,13 @@
 
 ## Version 2.0.0
 
+Breaking changes compared to version 1:
 - Rename `baretype` as `bare_type`.
+
+New features:
 - `bare_type()` with no arguments yields `Unitless.BareNumber`.
+- `unitless(x)` yields `x` without its units if any. `x` may be a number or a
+  numeric type.
 
 ## Version 1.3.0
 
