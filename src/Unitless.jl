@@ -23,7 +23,7 @@ const BareNumber = Union{Real,Complex}
 """
     bare_type() -> Unitless.BareNumber
 
-yields the union of bare numeric types.
+yields the union of bare numeric types in the `Unitless` package.
 
 """
 bare_type() = BareNumber
@@ -31,9 +31,9 @@ bare_type() = BareNumber
 """
     bare_type(x) -> T <: Union{Real,Complex}
 
-yields the bare numeric type of `x` which can be a numeric value or type (that
-is an instance or a sub-type of `Number`). This method is useful to strip units
-from quantities.
+yields the bare numeric type backing the storage of `x`. `x` may be a type, a
+value, or an object. If `x` has units, they are discarded; hence `T` is always
+a unitless real or complex type.
 
 Examples:
 

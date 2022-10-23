@@ -9,14 +9,14 @@ such as [`Unitful`](https://github.com/PainterQubits/Unitful.jl) are loaded.
 
 The `Unitless` package exports a few methods:
 
-* `baretype(x)` yields the bare numeric type of `x` (a numeric value or type).
+* `bare_type(x)` yields the bare numeric type of `x` (a numeric value or type).
   If this method is not extended for a specific type, the fallback
-  implementation yields `typeof(one(x))`.
+  implementation yields `typeof(one(x))`. With more than one argument,
+  `bare_type(args...)` yields the type resulting from promoting the bare
+  numeric types of `args...`. With no argument, `bare_type()` yields
+  `Unitless.BareNumber` the union of bare numeric types.
 
-* `baretype(args...)` yields the type resulting from promoting
-  the bare numeric types of `args...`.
-
-* `convert_baretype(T,x)` converts the bare numeric type of `x` to the bare
+* `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
   numeric type of `T` while preserving the units of `x` if any.
 
 
@@ -25,43 +25,43 @@ The `Unitless` package exports a few methods:
 ```julia
 julia> using Unitless
 
-julia> baretype(1)
+julia> bare_type(1)
 Int64
 
-julia> baretype(-3.14f0)
+julia> bare_type(-3.14f0)
 Float32
 
-julia> baretype(π)
+julia> bare_type(π)
 Irrational{:π}
 
-julia> baretype(sqrt(π))
+julia> bare_type(sqrt(π))
 Float64
 
-julia> baretype(1 + 0im)
+julia> bare_type(1 + 0im)
 Complex{Int64}
 
 julia> using Unitful
 
-julia> baretype(u"3km/s")
+julia> bare_type(u"3km/s")
 Int64
 
-julia> baretype(u"3.2km/s")
+julia> bare_type(u"3.2km/s")
 Float64
 
-julia> baretype(typeof(u"2.1GHz"))
+julia> bare_type(typeof(u"2.1GHz"))
 Float64
 ```
 
 
 ## Rationale
 
-The following example shows how to use `baretype` to implement efficient
+The following example shows how to use `bare_type` to implement efficient
 in-place multiplication of an array (whose element may have units) by a real
 factor (which has no units):
 
 ```julia
 function scale!(A::AbstractArray, α::Number)
-    alpha = convert_baretype(eltype(A), α)
+    alpha = convert_bare_type(eltype(A), α)
     @inbounds @simd for i in eachindex(A)
         A[i] *= alpha
     end
