@@ -38,6 +38,8 @@ Base.one(::Type{MyNumber{T}}) where {T} = one(T)
     @test baretype(Int, pi) === promote_type(Int, typeof(pi))
     @test baretype(4, pi, 1.0) === promote_type(Int, typeof(pi), Float64)
     @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
+    @test baretype(Int, Int8, Float32) === promote_type(Int, Int8, Float32)
+    @test baretype(Int, Int8, Int16, Float32) === promote_type(Int, Int8, Int16, Float32)
 
     # default implementation
     @test baretype(MyNumber(1.2f0)) === Float32
@@ -47,6 +49,7 @@ Base.one(::Type{MyNumber{T}}) where {T} = one(T)
     @test convert_baretype(Int, -1) === -1
     @test convert_baretype(Int, 2.0) === 2
     @test convert_baretype(Float32, 2.0) === 2.0f0
+    @test convert_baretype(MyNumber{Int16}, 12.0) === Int16(12)
 end
 
 @testset "Unitful quantities" begin
