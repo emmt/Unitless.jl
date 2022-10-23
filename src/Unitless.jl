@@ -12,6 +12,14 @@ export
 using Requires
 
 """
+    Unitless.BareType
+
+is the union of bare numeric types, that is `Real` or `Complex`.
+
+"""
+const BareType = Union{Real,Complex}
+
+"""
     baretype(x)
 
 yields the bare numeric type of `x` which can be a numeric value or type (that
@@ -52,8 +60,7 @@ Float64
 
 """
 baretype(x::T) where {T} = baretype(T)
-baretype(::Type{T}) where {T<:Real} = T
-baretype(::Type{T}) where {T<:Complex} = T
+baretype(::Type{T}) where {T<:BareType} = T
 baretype(::Type{T}) where {T<:Number} = typeof(one(T))
 
 # Catch errors.
@@ -77,13 +84,13 @@ baretype(a, b, c) = promote_type(baretype(a), baretype(b), baretype(c))
 
 converts `x` so that its bare numeric type is the same as that of type `T`.
 
-"""
-convert_baretype(::Type{T}, x) where {T} = _convert_baretype(baretype(T), x)
+This method may be extended with `T<:Unitless.BareType` and for `x` being of
+non-standard numeric type.
 
-# Private method `_convert_baretype` is called by `convert_baretype` with a
-# first argument that is guaranteed to be a bare numeric type.
-_convert_baretype(::Type{T}, x::T) where {T} = x
-_convert_baretype(::Type{T}, x) where {T} = convert(T, x)
+"""
+convert_baretype(::Type{T}, x::T) where {T<:BareType} = x
+convert_baretype(::Type{T}, x) where {T<:BareType} = convert(T, x)
+convert_baretype(::Type{T}, x) where {T} = convert_baretype(baretype(T), x)
 
 function __init__()
     @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" include("with_unitful.jl")
