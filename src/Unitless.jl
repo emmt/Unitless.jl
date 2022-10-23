@@ -21,6 +21,14 @@ is the union of bare numeric types, that is `Real` or `Complex`.
 const BareNumber = Union{Real,Complex}
 
 """
+    bare_type() -> Unitless.BareNumber
+
+yields the union of bare numeric types.
+
+"""
+bare_type() = BareNumber
+
+"""
     bare_type(x) -> T <: Union{Real,Complex}
 
 yields the bare numeric type of `x` which can be a numeric value or type (that

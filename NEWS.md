@@ -3,6 +3,7 @@
 ## Version 2.0.0
 
 - Rename `baretype` as `bare_type`.
+- `bare_type()` with no arguments yields `Unitless.BareNumber`.
 
 ## Version 1.3.0
 

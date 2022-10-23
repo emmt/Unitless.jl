@@ -13,6 +13,9 @@ Base.oneunit(::Type{MyNumber{T}}) where {T} = MyNumber{T}(one(T))
 Base.one(::Type{MyNumber{T}}) where {T} = one(T)
 
 @testset "Basic types" begin
+    # bare_type with no argument
+    @test bare_type() === Unitless.BareNumber
+
     # bare_type for values
     @test bare_type(1.0) === Float64
     @test bare_type(Float32) === Float32
