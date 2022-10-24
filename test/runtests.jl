@@ -148,6 +148,7 @@ end
     end
     let x = 2 + 3im
         @test convert_real_type(typeof(x), x) === x
+        @test convert_real_type(real(typeof(x)), x) === x
     end
     @test convert_real_type(Complex{Int16}, 2 + 3im) === Complex{Int16}(2, 3)
     @test convert_real_type(Float32, 2.0 - 1.0im) === Complex{Float32}(2, -1)
