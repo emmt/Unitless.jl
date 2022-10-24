@@ -118,7 +118,9 @@ end
 """
     convert_bare_type(T, x)
 
-converts `x` so that its bare numeric type is the same as that of type `T`.
+converts `x` so that its bare numeric type is that of type `T`. If `x` is one
+of `missing`, `nothing`, `undef`, or the type of one of these singletons, `x`
+is returned.
 
 This method may be extended with `T<:Unitless.BareNumber` and for `x` of
 non-standard numeric type.
@@ -136,7 +138,9 @@ convert_bare_type(::Type{T}, x) where {T<:BareNumber} = error(
 """
     convert_real_type(T, x)
 
-converts `x` so that its bare real type is the same as that of type `T`.
+converts `x` so that its bare real type is that of type `T`. If `x` is one of
+`missing`, `nothing`, `undef`, or the type of one of these singletons, `x` is
+returned.
 
 This method may be extended with `T<:Real` and for `x` of non-standard numeric
 type.
@@ -154,6 +158,15 @@ convert_real_type(::Type{T}, x) where {T<:Real} = error(
     # NOTE: split string to avoid inlining
     "unsupported conversion of bare real type of object of type `",
     typeof(x), "` to `", T, "`")
+
+# Special values/types.
+for f in (:convert_bare_type, :convert_real_type), x in (missing, nothing, undef)
+    T = typeof(x)
+    @eval begin
+        $f(::Type{<:Real}, ::$T) = $x
+        $f(::Type{<:Real}, ::Type{$T}) = $T
+    end
+end
 
 """
     floating_point_type(args...) -> T <: AbstractFloat
