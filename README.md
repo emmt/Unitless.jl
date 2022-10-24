@@ -14,6 +14,10 @@ extends its exported methods when packages such as
 
 The `Unitless` package exports a few methods:
 
+* `unitless(x)` yields `x` without its units, if any. `x` can be a number or a
+  numeric type. In the latter case, `unitless` behaves like `bare_type`
+  described below.
+
 * `bare_type(x)` yields the bare numeric type of `x` (a numeric value or type).
   If this method is not extended for a specific type, the fallback
   implementation yields `typeof(one(x))`. With more than one argument,
@@ -44,54 +48,49 @@ The `Unitless` package exports a few methods:
   `floating_point_type()` yields `AbstractFloat` the super-type of types that
   may be returned by this method.
 
-* `unitless(x)` yields `x` without its units, if any. `x` can be a number or a
-  numeric type. In the latter case, `unitless` behaves like `bare_type`.
-
 
 ## Examples
+
+The following examples illustrate the result of the methods provided by
+`Unitful`, first with bare numbers and bare numeric types, then with
+quantities:
 
 ```julia
 julia> using Unitless
 
-julia> bare_type(1)
-Int64
+julia> map(unitless, (2.1, Float64, true, ComplexF32))
+(2.1, Float64, true, ComplexF32)
 
-julia> bare_type(-3.14f0)
-Float32
+julia> map(bare_type, (1, 3.14f0, true, 1//3, π, 1.0 - 2.0im))
+(Int64, Float32, Bool, Rational{Int64}, Irrational{:π}, Complex{Float64})
 
-julia> bare_type(π)
-Irrational{:π}
+julia> map(real_type, (1, 3.14f0, true, 1//3, π, 1.0 - 2.0im))
+(Int64, Float32, Bool, Rational{Int64}, Irrational{:π}, Float64)
 
-julia> bare_type(sqrt(π))
-Float64
+julia> map(x -> convert_bare_type(Float32, x), (2, 1 - 0im, 1//2, Bool, Complex{Float64}))
+(2.0f0, 1.0f0, 0.5f0, Float32, Float32)
 
-julia> bare_type(1 + 0im)
-Complex{Int64}
+julia> map(x -> convert_real_type(Float32, x), (2, 1 - 0im, 1//2, Bool, Complex{Float64}))
+(2.0f0, 1.0f0 + 0.0f0im, 0.5f0, Float32, ComplexF32)
 
 julia> using Unitful
 
-julia> bare_type(u"3km/s")
-Int64
+julia> map(unitless, (u"2.1GHz", typeof(u"2.1GHz")))
+(2.1, Float64)
 
-julia> bare_type(u"3.2km/s")
-Float64
+julia> map(bare_type, (u"3.2km/s", u"5GHz", typeof((0+1im)*u"Hz")))
+(Float64, Int64, Complex{Int64})
 
-julia> bare_type(typeof(u"2.1GHz"))
-Float64
-
-julia> unitless(typeof(u"2.1GHz"))
-Float64
-
-julia> unitless(u"2.1GHz")
-2.1
+julia> map(real_type, (u"3.2km/s", u"5GHz", typeof((0+1im)*u"Hz")))
+(Float64, Int64, Int64)
 ```
 
 
 ## Rationale
 
-The following example shows how to use `bare_type` to implement efficient
-in-place multiplication of an array (whose element may have units) by a real
-factor (which has no units):
+The following example shows a first attempt to use `bare_type` to implement
+efficient in-place multiplication of an array (whose element may have units) by
+a real factor (which should have no units):
 
 ```julia
 function scale!(A::AbstractArray, α::Number)
@@ -103,11 +102,56 @@ function scale!(A::AbstractArray, α::Number)
 end
 ```
 
+An improvement is to realize that when `α` is a real while the entries of `A`
+are complexes, it is more efficient to multiply the entries of `A` by a
+real-valued multiplier rather than by a complex one. Implementing this is as
+simple as replacing `convert_bare_type` by `convert_real_type` to only convert
+the bare real type of the multiplier while preserving its complex/real kind:
+
+```julia
+function scale!(A::AbstractArray, α::Number)
+    alpha = convert_real_type(eltype(A), α)
+    @inbounds @simd for i in eachindex(A)
+        A[i] *= alpha
+    end
+    return A
+end
+```
+
+This latter version consistently and efficiently deals with `α` being real
+while the entries of `A` are reals or complexes, and with `α` and the entries
+of `A` being complexes. If `α` is a complex and the entries of `A` are reals,
+the statement `A[i] *= alpha` will check that the imaginary part of `α` is zero
+and will throw an `InexactConversion` if this is not the case. This check is
+probably optimized out of the loop by Julia but, to handle this with guaranteed
+no loss of efficiency, the code can be written as:
+
+```julia
+function scale!(A::AbstractArray, α::Union{Real,Complex})
+    alpha = if α isa Complex && bare_type(eltype(A)) isa Real
+        convert(real_type(eltype(A)), α)
+    else
+        convert_real_type(eltype(A), α)
+    end
+    @inbounds @simd for i in eachindex(A)
+        A[i] *= alpha
+    end
+    return A
+end
+```
+
+The restriction `α::Union{Real,Complex}` accounts for the fact that in-place
+multiplication imposes a unitless multiplier. Since the test leading to the
+expression used for `alpha` is based on the types of the arguments, the branch
+is eliminated at compile time and the type of `alpha` is known by the compiler.
+The `InexactConversion` exception may then only be thrown by the call to
+`convert` in the first branch of the test.
+
 This seemingly very specific case was in fact the key point to allow for
 packages such as [LazyAlgebra](https://github.com/emmt/LazyAlgebra.jl) or
 [LinearInterpolators](https://github.com/emmt/LinearInterpolators.jl) to work
 seamlessly on arrays whose entries may have units. The `Unitless` package was
-created to cover this need.
+created to cover this need as transparently as possible.
 
 
 ## Installation

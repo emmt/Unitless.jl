@@ -22,6 +22,35 @@ Unitless.convert_bare_type(T::Type{<:BareNumber}, ::Type{<:MyNumber}) =
 Unitless.convert_real_type(T::Type{<:Real}, ::Type{MyNumber{S}}) where {S} =
     MyNumber{convert_real_type(T,S)}
 
+# Different implementations of in-place multiplication.
+function scale!(::Val{1}, A::AbstractArray, α::Number)
+    alpha = convert_bare_type(eltype(A), α)
+    @inbounds @simd for i in eachindex(A)
+        A[i] *= alpha
+    end
+    return A
+end
+
+function scale!(::Val{2}, A::AbstractArray, α::Number)
+    alpha = convert_real_type(eltype(A), α)
+    @inbounds @simd for i in eachindex(A)
+        A[i] *= alpha
+    end
+    return A
+end
+
+function scale!(::Val{3}, A::AbstractArray, α::Union{Real,Complex})
+    alpha = if α isa Complex && bare_type(eltype(A)) isa Real
+        convert(real_type(eltype(A)), α)
+    else
+        convert_real_type(eltype(A), α)
+    end
+    @inbounds @simd for i in eachindex(A)
+        A[i] *= alpha
+    end
+    return A
+end
+
 @testset "Basic types" begin
     # bare_type with no argument
     @test bare_type() === BareNumber
@@ -162,6 +191,19 @@ Unitless.convert_real_type(T::Type{<:Real}, ::Type{MyNumber{S}}) where {S} =
     @test unitless(π) === π
     @test unitless(MyNumber(1.2f0)) === 1.2f0
     @test unitless(MyNumber{Int16}) === Int16
+
+    # in-place multiplication
+    A = [1.1, 1.3, 2.7]
+    B = similar(A)
+    alpha = 2 + 0im
+    @test scale!(Val(1), copyto!(B, A), alpha) == alpha .* A
+    @test scale!(Val(2), copyto!(B, A), alpha) == alpha .* A
+    @test scale!(Val(3), copyto!(B, A), alpha) == alpha .* A
+    alpha = 2 - 1im
+    @test_throws InexactError scale!(Val(1), copyto!(B, A), alpha)
+    @test_throws InexactError scale!(Val(2), copyto!(B, A), alpha)
+    @test_throws InexactError scale!(Val(3), copyto!(B, A), alpha)
+
 end
 
 @testset "Unitful quantities" begin
@@ -216,6 +258,18 @@ end
     # unitless
     @test unitless(u"17GHz") === 17
     @test unitless(typeof(u"2.0f0m/s")) === Float32
+
+    # in-place multiplication
+    A = [1.1u"m/s", 1.3u"m/s", 2.7u"m/s"]
+    B = similar(A)
+    alpha = 2 + 0im
+    @test scale!(Val(1), copyto!(B, A), alpha) == alpha .* A
+    @test scale!(Val(2), copyto!(B, A), alpha) == alpha .* A
+    @test scale!(Val(3), copyto!(B, A), alpha) == alpha .* A
+    alpha = 2 - 1im
+    @test_throws InexactError scale!(Val(1), copyto!(B, A), alpha)
+    @test_throws InexactError scale!(Val(2), copyto!(B, A), alpha)
+    @test_throws InexactError scale!(Val(3), copyto!(B, A), alpha)
 end
 
 end # module UnitlessTests
