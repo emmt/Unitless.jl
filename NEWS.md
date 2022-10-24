@@ -8,7 +8,8 @@ Breaking changes:
 
 New features:
 - `bare_type()` with no arguments yields `Unitless.BareNumber`.
-- `real_type` and `convert_real_type` which work like `bare_type` and
+- `convert_bare_type()` can convert types.
+- New methods `real_type` and `convert_real_type` similar to `bare_type` and
   `convert_bare_type` except for complex numbers or numeric types for which the
   bare real type backing the storage of the real and imaginary parts is
   considered.

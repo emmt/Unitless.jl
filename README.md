@@ -30,10 +30,14 @@ The `Unitless` package exports a few methods:
   super-type of types that may be returned by this method.
 
 * `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
-  numeric type of `T` while preserving the units of `x` if any.
+  numeric type of `T` while preserving the units of `x` if any.`x` may be a
+  number or a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or
+  the type of one of these singletons, `x` is returned.
 
 * `convert_real_type(T,x)` converts the bare real type of `x` to the bare real
-  type of `T` while preserving the units of `x` if any.
+  type of `T` while preserving the units of `x` if any. `x` may be a number or
+  a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or the type
+  of one of these singletons, `x` is returned.
 
 * `floating_point_type(args...)` yields a floating-point type appropriate to
   represent the bare real type of `args...`. With no argument,

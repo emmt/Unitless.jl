@@ -1,11 +1,12 @@
 module UnitlessTests
 
 using Unitless
+using Unitless: BareNumber
 using Unitful
 using Test
 
 # Minimal implementation of a custom numeric type.
-struct MyNumber{T<:Unitless.BareNumber} <: Number
+struct MyNumber{T<:BareNumber} <: Number
     val::T
 end
 Base.zero(::Type{MyNumber{T}}) where {T} = MyNumber{T}(zero(T))
@@ -16,10 +17,14 @@ Base.real(x::MyNumber{<:Complex}) = MyNumber(real(x.val))
 Base.real(::Type{MyNumber{T}}) where {T<:Real} = MyNumber{T}
 Base.real(::Type{MyNumber{Complex{T}}}) where {T<:Real} = MyNumber{T}
 Unitless.unitless(x::MyNumber) = x.val
+Unitless.convert_bare_type(T::Type{<:BareNumber}, ::Type{<:MyNumber}) =
+    MyNumber{T}
+Unitless.convert_real_type(T::Type{<:Real}, ::Type{MyNumber{S}}) where {S} =
+    MyNumber{convert_real_type(T,S)}
 
 @testset "Basic types" begin
     # bare_type with no argument
-    @test bare_type() === Unitless.BareNumber
+    @test bare_type() === BareNumber
 
     # bare_type for values
     @test bare_type(1.0) === Float64
@@ -62,6 +67,14 @@ Unitless.unitless(x::MyNumber) = x.val
         @test convert_bare_type(Int8, x) === x
         @test convert_bare_type(Int8, typeof(x)) === typeof(x)
     end
+    @test convert_bare_type(Int16, Int32) === Int16
+    @test convert_bare_type(Int16, Complex{Int32}) === Int16
+    @test convert_bare_type(Complex{Int16}, Int32) === Complex{Int16}
+    @test convert_bare_type(Complex{Int16}, Complex{Int32}) === Complex{Int16}
+    @test convert_bare_type(MyNumber{Int16}, MyNumber{Int32}) === MyNumber{Int16}
+    @test convert_bare_type(Int16, MyNumber{Complex{Int32}}) === MyNumber{Int16}
+    @test convert_bare_type(Complex{Int16}, MyNumber{Int32}) === MyNumber{Complex{Int16}}
+    @test_throws ErrorException convert_bare_type(Int, String)
 
     # real_type with no argument
     @test real_type() === Real
@@ -115,6 +128,14 @@ Unitless.unitless(x::MyNumber) = x.val
         @test convert_real_type(Int8, x) === x
         @test convert_real_type(Int8, typeof(x)) === typeof(x)
     end
+    @test convert_real_type(Int16, Int32) === Int16
+    @test convert_real_type(Int16, Complex{Int32}) === Complex{Int16}
+    @test convert_real_type(Complex{Int16}, Int32) === Int16
+    @test convert_real_type(Complex{Int16}, Complex{Int32}) === Complex{Int16}
+    @test convert_real_type(MyNumber{Int16}, MyNumber{Int32}) === MyNumber{Int16}
+    @test convert_real_type(Int16, MyNumber{Complex{Int32}}) === MyNumber{Complex{Int16}}
+    @test convert_real_type(Complex{Int16}, MyNumber{Int32}) === MyNumber{Int16}
+    @test_throws ErrorException convert_real_type(Int, String)
 
     # floating_point_type
     @test floating_point_type() === AbstractFloat
@@ -161,7 +182,12 @@ end
     @test convert_bare_type(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_bare_type(Int, u"2.0m/s") === u"2m/s"
     @test convert_bare_type(Float32, u"35GHz") === u"35.0f0GHz"
-
+    let u = u"km/s"
+        @test convert_bare_type(Int16, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
+        @test convert_bare_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(one(Int16)*u)
+        @test convert_bare_type(Complex{Int16}, typeof(one(Int32)*u)) === typeof(one(Complex{Int16})*u)
+        @test convert_bare_type(Complex{Int16}, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)
+    end
 
     # real_type for values
     @test real_type(u"2.0m/s") === Float64
@@ -180,6 +206,12 @@ end
     @test convert_real_type(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_real_type(Int, u"2.0m/s") === u"2m/s"
     @test convert_real_type(Float32, u"35GHz") === u"35.0f0GHz"
+    let u = u"km/s"
+        @test convert_real_type(Int16, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
+        @test convert_real_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)
+        @test convert_real_type(Complex{Int16}, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
+        @test convert_real_type(Complex{Int16}, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)
+    end
 
     # unitless
     @test unitless(u"17GHz") === 17

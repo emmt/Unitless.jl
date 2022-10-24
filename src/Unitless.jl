@@ -118,46 +118,54 @@ end
 """
     convert_bare_type(T, x)
 
-converts `x` so that its bare numeric type is that of type `T`. If `x` is one
-of `missing`, `nothing`, `undef`, or the type of one of these singletons, `x`
-is returned.
+converts `x` so that its bare numeric type is that of type `T`. `x` may be a
+number or a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or
+the type of one of these singletons, `x` is returned.
 
 This method may be extended with `T<:Unitless.BareNumber` and for `x` of
 non-standard numeric type.
 
 """
+convert_bare_type(::Type{T}, x) where {T<:Number} = convert_bare_type(bare_type(T), x)
 convert_bare_type(::Type{T}, x::T) where {T<:BareNumber} = x
 convert_bare_type(::Type{T}, x::BareNumber) where {T<:BareNumber} = convert(T, x)
-
-convert_bare_type(::Type{T}, x) where {T<:Number} = convert_bare_type(bare_type(T), x)
 convert_bare_type(::Type{T}, x) where {T<:BareNumber} = error(
     # NOTE: split string to avoid inlining
     "unsupported conversion of bare numeric type of object of type `",
     typeof(x), "` to `", T, "`")
 
+convert_bare_type(::Type{T}, ::Type{<:BareNumber}) where {T<:BareNumber} = T
+convert_bare_type(::Type{T}, ::Type{S}) where {T<:BareNumber,S} = error(
+    # NOTE: split string to avoid inlining
+    "unsupported conversion of bare numeric type of type `", S,"` to `", T, "`")
+
 """
     convert_real_type(T, x)
 
-converts `x` so that its bare real type is that of type `T`. If `x` is one of
-`missing`, `nothing`, `undef`, or the type of one of these singletons, `x` is
-returned.
+converts `x` so that its bare real type is that of type `T`. `x` may be a
+number or a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or
+the type of one of these singletons, `x` is returned.
 
 This method may be extended with `T<:Real` and for `x` of non-standard numeric
 type.
 
 """
+convert_real_type(::Type{T}, x) where {T<:Number} = convert_real_type(real_type(T), x)
 convert_real_type(::Type{T}, x::T) where {T<:Real} = x
 convert_real_type(::Type{T}, x::T) where {T<:Complex} = x
 convert_real_type(::Type{T}, x::Complex{T}) where {T<:Real} = x
-
 convert_real_type(::Type{T}, x::Real) where {T<:Real} = convert(T, x)
 convert_real_type(::Type{T}, x::Complex) where {T<:Real} = convert(Complex{T}, x)
-
-convert_real_type(::Type{T}, x) where {T<:Number} = convert_real_type(real_type(T), x)
 convert_real_type(::Type{T}, x) where {T<:Real} = error(
     # NOTE: split string to avoid inlining
     "unsupported conversion of bare real type of object of type `",
     typeof(x), "` to `", T, "`")
+
+convert_real_type(::Type{T}, ::Type{<:Real}) where {T<:Real} = T
+convert_real_type(::Type{T}, ::Type{<:Complex}) where {T<:Real} = Complex{T}
+convert_real_type(::Type{T}, ::Type{S}) where {T<:Real,S} = error(
+    # NOTE: split string to avoid inlining
+    "unsupported conversion of bare real type of type `", S,"` to `", T, "`")
 
 # Special values/types.
 for f in (:convert_bare_type, :convert_real_type), x in (missing, nothing, undef)
@@ -223,6 +231,10 @@ function __init__()
                 $g(::Type{T}, x::Unitful.AbstractQuantity{T}) where {T<:$S} = x
                 @inline $g(::Type{T}, x::Unitful.AbstractQuantity) where {T<:$S} =
                     $g(T, Unitful.ustrip(x))*Unitful.unit(x)
+                $g(::Type{T}, ::Type{Unitful.Quantity{T,D,U}}) where {T<:$S,D,U} =
+                    Unitful.Quantity{T,D,U}
+                @inline $g(::Type{T}, ::Type{Unitful.Quantity{R,D,U}}) where {T<:$S,R,D,U} =
+                    Unitful.Quantity{$g(T,R),D,U}
             end
         end
 
