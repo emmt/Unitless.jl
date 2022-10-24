@@ -10,6 +10,7 @@ export
     bare_type,
     convert_bare_type,
     convert_real_type,
+    floating_point_type,
     real_type,
     unitless
 
@@ -50,8 +51,8 @@ yields the promoted bare numeric type of `args...`.
 ---
     bare_type() -> Unitless.BareNumber
 
-yields the union of bare numeric types that may be returned by `bare_type` with
-at least one argument.
+yields the union of bare numeric types that may be returned by `bare_type` when
+called with at least one argument.
 
 """
 bare_type() = BareNumber
@@ -92,8 +93,8 @@ yields the promoted bare real type of `args...`.
 ---
     real_type() -> Real
 
-yields the supertype of the types that may be returned by `real_type` with at
-least one argument.
+yields the supertype of the types that may be returned by `real_type` when
+called with at least one argument.
 
 """
 real_type() = Real
@@ -153,6 +154,35 @@ convert_real_type(::Type{T}, x) where {T<:Real} = error(
     # NOTE: split string to avoid inlining
     "unsupported conversion of bare real type of object of type `",
     typeof(x), "` to `", T, "`")
+
+"""
+    floating_point_type(args...) -> T <: AbstractFloat
+
+yields an appropriate floating-point type to represent the promoted numeric
+type used by arguments `args...` for storing their value(s). Any units of the
+arguments are ignored and the returned type is always unitless.
+
+For numerical computations, a typical usage is:
+
+    T = floating_point_type(x, y, ...)
+    xp = convert_real_type(T, x)
+    yp = convert_real_type(T, y)
+    ...
+
+to have numbers `x`, `y`, etc. converted to an appropriate common
+floating-point type while preserving their units if any.
+
+Also see [`real_type`](@ref) and [`convert_real_type`](@ref).
+
+---
+    floating_point_type() -> AbstractFloat
+
+yields the supertype of the types that may be returned by `floating_point_type`
+when called with at least one argument.
+
+"""
+floating_point_type() = AbstractFloat
+@inline floating_point_type(args...) = float(real_type(args...))
 
 """
     unitless(x)

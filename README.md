@@ -35,6 +35,11 @@ The `Unitless` package exports a few methods:
 * `convert_real_type(T,x)` converts the bare real type of `x` to the bare real
   type of `T` while preserving the units of `x` if any.
 
+* `floating_point_type(args...)` yields a floating-point type appropriate to
+  represent the bare real type of `args...`. With no argument,
+  `floating_point_type()` yields `AbstractFloat` the super-type of types that
+  may be returned by this method.
+
 * `unitless(x)` yields `x` without its units, if any. `x` can be a number or a
   numeric type. In the latter case, `unitless` behaves like `bare_type`.
 

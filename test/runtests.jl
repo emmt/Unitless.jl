@@ -97,10 +97,23 @@ Unitless.unitless(x::MyNumber) = x.val
     @test convert_real_type(Int, -1) === -1
     @test convert_real_type(Int, 2.0) === 2
     @test convert_real_type(Complex{Float32}, 2.0) === 2.0f0
+    let x = 2.1f0
+        @test convert_real_type(typeof(x), x) === x
+    end
+    let x = 2 + 3im
+        @test convert_real_type(typeof(x), x) === x
+    end
     @test convert_real_type(Complex{Int16}, 2 + 3im) === Complex{Int16}(2, 3)
     @test convert_real_type(Float32, 2.0 - 1.0im) === Complex{Float32}(2, -1)
     @test convert_real_type(MyNumber{Int16}, 12.0) === Int16(12)
     @test_throws ErrorException convert_real_type(Int, "oups!")
+
+    # floating_point_type
+    @test floating_point_type() === AbstractFloat
+    @test floating_point_type(Int16) === float(Int16)
+    @test floating_point_type(Int16, Float32) === Float32
+    @test floating_point_type(Int16, Float32, Complex{Float64}) === Float64
+    @test floating_point_type(Int16, Float32, Complex{Float16}, 0x1) === Float32
 
     # unitless
     @test unitless(Real) === bare_type(Real)
