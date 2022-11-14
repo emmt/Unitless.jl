@@ -1,5 +1,12 @@
 # User visible changes in `Unitless`
 
+
+## Version 2.0.1
+
+Fix the treatment of special values `missing`, `nothing`, or `undef`, and of
+their types.
+
+
 ## Version 2.0.0
 
 Breaking changes:
