@@ -33,20 +33,33 @@ The `Unitless` package exports a few methods:
   types of `args...`. With no argument, `real_type()` yields `Real` the
   super-type of types that may be returned by this method.
 
-* `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
-  numeric type of `T` while preserving the units of `x` if any.`x` may be a
-  number or a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or
-  the type of one of these singletons, `x` is returned.
-
-* `convert_real_type(T,x)` converts the bare real type of `x` to the bare real
-  type of `T` while preserving the units of `x` if any. `x` may be a number or
-  a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or the type
-  of one of these singletons, `x` is returned.
-
 * `floating_point_type(args...)` yields a floating-point type appropriate to
   represent the bare real type of `args...`. With no argument,
   `floating_point_type()` yields `AbstractFloat` the super-type of types that
-  may be returned by this method.
+  may be returned by this method. You may consider
+  `floating_point_type(args...)` as an equivalent to
+  to`float(real_type(args...))`.
+
+* `convert_bare_type(T,x)` converts the bare numeric type of `x` to the bare
+  numeric type of `T` while preserving the units of `x` if any. Argument `x`
+  may be a number or a numeric type, while argument `T` must be a numeric type.
+  If `x` is one of `missing`, `nothing`, `undef`, or the type of one of these
+  singletons, `x` is returned.
+
+* `convert_real_type(T,x)` converts the bare real type of `x` to the bare real
+  type of `T` while preserving the units of `x` if any. Argument `x` may be a
+  number or a numeric type, while argument `T` must be a numeric type. If `x`
+  is one of `missing`, `nothing`, `undef`, or the type of one of these
+  singletons, `x` is returned.
+
+The only difference between `bare_type` and `real_type` is how they treat
+complex numbers. The former preserves the complex kind of its argument while
+the former always returns a real type. You may assume that `real_type(x) =
+real(bare_type(x))`. Conversely, `convert_bare_type(T,x)` yields a complex
+result if `T` is complex and a real result if `T` is real whatever `x`, while
+`convert_real_type(T,x)` yields a complex result if `x` is complex and a real
+result if `x` is real, only the real part of `T` matters for
+`convert_real_type(T,x)`. See examples below.
 
 
 ## Examples
@@ -90,7 +103,7 @@ julia> map(real_type, (u"3.2km/s", u"5GHz", typeof((0+1im)*u"Hz")))
 
 The following example shows a first attempt to use `bare_type` to implement
 efficient in-place multiplication of an array (whose element may have units) by
-a real factor (which should have no units):
+a real factor (which must be unitless in this context):
 
 ```julia
 function scale!(A::AbstractArray, α::Number)
