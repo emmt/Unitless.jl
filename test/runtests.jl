@@ -21,8 +21,6 @@ Unitless.convert_bare_type(T::Type{<:BareNumber}, ::Type{<:MyNumber}) =
     MyNumber{T}
 Unitless.convert_real_type(T::Type{<:Real}, ::Type{MyNumber{S}}) where {S} =
     MyNumber{convert_real_type(T,S)}
-Unitless.convert_floating_point_type(T::Type{<:AbstractFloat}, ::Type{MyNumber{S}}) where {S} =
-    MyNumber{convert_floating_point_type(T,S)}
 
 # Different implementations of in-place multiplication.
 function scale!(::Val{1}, A::AbstractArray, α::Number)

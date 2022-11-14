@@ -173,46 +173,10 @@ convert_real_type(::Type{T}, ::Type{S}) where {T<:Real,S} = error(
     # NOTE: split string to avoid inlining
     "unsupported conversion of bare real type of type `", S, "` to `", T, "`")
 
-"""
-    convert_floating_point_type(T, x)
-
-converts `x` so that its bare real type is the floating-point type of `T`.
-Argument `x` may be a number or a numeric type, while argument `T` must be a
-numeric type. If `x` is one of `missing`, `nothing`, `undef`, or the type of
-one of these singletons, `x` is returned.
-
-This method may be extended with `T<:AbstractFloat` and for `x` of non-standard
-numeric type.
-
-"""
-convert_floating_point_type(::Type{T}, x) where {T<:Number} =
-    # NOTE: Code could be as simple as `convert_real_type(float(real_type(T)), x)`
-    # but would result in having less specific error emssages.
-    convert_floating_point_type(floating_point_type(T), x)
-
-# NOTE: All other specializations of `convert_floating_point_type(T,x)` are for
-#       `T<:AbstractFloat`.
-convert_floating_point_type(::Type{T}, x::T) where {T<:AbstractFloat} = x
-convert_floating_point_type(::Type{T}, x::Complex{T}) where {T<:AbstractFloat} = x
-convert_floating_point_type(::Type{T}, x::Real) where {T<:AbstractFloat} = convert(T, x)
-convert_floating_point_type(::Type{T}, x::Complex) where {T<:AbstractFloat} = convert(Complex{T}, x)
-convert_floating_point_type(::Type{T}, x) where {T<:AbstractFloat} = error(
-    # NOTE: split string to avoid inlining
-    "unsupported conversion of bare real type of object of type `",
-    typeof(x), "` to floating-point type of `", T, "`")
-
-convert_floating_point_type(::Type{T}, ::Type{<:Real}) where {T<:AbstractFloat} = T
-convert_floating_point_type(::Type{T}, ::Type{<:Complex}) where {T<:AbstractFloat} = Complex{T}
-convert_floating_point_type(::Type{T}, ::Type{S}) where {T<:AbstractFloat,S} = error(
-    # NOTE: split string to avoid inlining
-    "unsupported conversion of bare real type of type `", S,
-    "` to floating-point type of `", T, "`")
-
 # Special values/types.
 const Untouched = Union{Missing,Nothing,typeof(undef)}
 for (func, type) in ((:convert_bare_type, :BareNumber),
-                     (:convert_real_type, :Real),
-                     (:convert_floating_point_type, :AbstractFloat))
+                     (:convert_real_type, :Real))
     @eval begin
         $func(::Type{<:$type}, x::Untouched) = x
         $func(::Type{<:$type}, T::Type{<:Untouched}) = T
@@ -249,6 +213,21 @@ floating_point_type() = AbstractFloat
 @inline floating_point_type(args...) = float(real_type(args...))
 
 """
+    convert_floating_point_type(T, x)
+
+converts `x` so that its bare real type is the floating-point type of `T`.
+Argument `x` may be a number or a numeric type, while argument `T` must be a
+numeric type. If `x` is one of `missing`, `nothing`, `undef`, or the type of
+one of these singletons, `x` is returned.
+
+This method may be extended with `T<:AbstractFloat` and for `x` of non-standard
+numeric type.
+
+"""
+convert_floating_point_type(::Type{T}, x) where {T<:Number} =
+    convert_real_type(floating_point_type(T), x)
+
+"""
     unitless(x)
 
 yields `x` without its units if any. `x` may be a number or a numeric type. In
@@ -268,8 +247,7 @@ function __init__()
         # Extend bare_type, real_type, convert_bare_type, and
         # convert_real_type.
         for (f, g, S) in ((:bare_type, :convert_bare_type, :BareNumber),
-                          (:real_type, :convert_real_type, :Real),
-                          (:floating_point_type, :convert_floating_point_type, :AbstractFloat))
+                          (:real_type, :convert_real_type, :Real))
             @eval begin
                 $f(::Type{<:Unitful.AbstractQuantity{T}}) where {T} = $f(T)
                 $g(::Type{T}, x::Unitful.AbstractQuantity{T}) where {T<:$S} = x
