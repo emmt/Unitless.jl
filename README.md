@@ -52,6 +52,14 @@ The `Unitless` package exports a few methods:
   is one of `missing`, `nothing`, `undef`, or the type of one of these
   singletons, `x` is returned.
 
+* `convert_floating_point_type(T,x)` converts the bare real type of `x` to the
+  suitable floating-point type for type `T` while preserving the units of `x`
+  if any. Argument `x` may be a number or a numeric type, while argument `T`
+  must be a numeric type. If `x` is one of `missing`, `nothing`, `undef`, or
+  the type of one of these singletons, `x` is returned. You may consider
+  `convert_floating_point_type(T,x)` as an equivalent to
+  to `convert_real_type(float(real_type(T)),x)`.
+
 The only difference between `bare_type` and `real_type` is how they treat
 complex numbers. The former preserves the complex kind of its argument while
 the former always returns a real type. You may assume that `real_type(x) =

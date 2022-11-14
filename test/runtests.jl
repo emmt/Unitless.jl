@@ -21,6 +21,8 @@ Unitless.convert_bare_type(T::Type{<:BareNumber}, ::Type{<:MyNumber}) =
     MyNumber{T}
 Unitless.convert_real_type(T::Type{<:Real}, ::Type{MyNumber{S}}) where {S} =
     MyNumber{convert_real_type(T,S)}
+Unitless.convert_floating_point_type(T::Type{<:AbstractFloat}, ::Type{MyNumber{S}}) where {S} =
+    MyNumber{convert_floating_point_type(T,S)}
 
 # Different implementations of in-place multiplication.
 function scale!(::Val{1}, A::AbstractArray, α::Number)
@@ -174,6 +176,34 @@ end
     @test floating_point_type(Int16, Float32, Complex{Float64}) === Float64
     @test floating_point_type(Int16, Float32, Complex{Float16}, 0x1) === Float32
 
+    # convert_floating_point_type
+    @test convert_floating_point_type(Int, -1) === -1.0
+    @test convert_floating_point_type(Int, 2.0) === 2.0
+    @test convert_floating_point_type(Complex{Float32}, 2.0) === 2.0f0
+    let x = 2.1f0
+        @test convert_floating_point_type(typeof(x), x) === x
+    end
+    let x = 2 + 3im
+        @test convert_floating_point_type(typeof(x), x) === float(x)
+        @test convert_floating_point_type(real(typeof(x)), x) === float(x)
+    end
+    @test convert_floating_point_type(Complex{Int16}, 2 + 3im) === Complex{Float64}(2, 3)
+    @test convert_floating_point_type(Float32, 2.0 - 1.0im) === Complex{Float32}(2, -1)
+    @test convert_floating_point_type(MyNumber{Int16}, 12.0) === Float64(12)
+    @test_throws ErrorException convert_floating_point_type(Int, "oups!")
+    for x in (missing, nothing, undef)
+        @test convert_floating_point_type(Float32, x) === x
+        @test convert_floating_point_type(Float32, typeof(x)) === typeof(x)
+    end
+    @test convert_floating_point_type(Float32, Float64) === Float32
+    @test convert_floating_point_type(Float32, Complex{Float64}) === Complex{Float32}
+    @test convert_floating_point_type(Complex{Float32}, Float64) === Float32
+    @test convert_floating_point_type(Complex{Float32}, Complex{Float64}) === Complex{Float32}
+    @test convert_floating_point_type(MyNumber{Float32}, MyNumber{Float64}) === MyNumber{Float32}
+    @test convert_floating_point_type(Float32, MyNumber{Complex{Float64}}) === MyNumber{Complex{Float32}}
+    @test convert_floating_point_type(Complex{Float32}, MyNumber{Float64}) === MyNumber{Float32}
+    @test_throws ErrorException convert_floating_point_type(Int, String)
+
     # unitless
     @test unitless(Real) === bare_type(Real)
     @test unitless(Integer) === bare_type(Integer)
@@ -266,6 +296,23 @@ end
         @test convert_real_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)
         @test convert_real_type(Complex{Int16}, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
         @test convert_real_type(Complex{Int16}, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)
+    end
+
+    # convert_floating_point_type
+    @test convert_floating_point_type(Float64, u"2.0m/s") === u"2.0m/s"
+    @test convert_floating_point_type(Int, u"2.0m/s") === u"2.0m/s"
+    @test convert_floating_point_type(Float32, u"35GHz") === u"35.0f0GHz"
+    let T = typeof(u"3.5GHz")
+        for x in (missing, nothing, undef)
+            @test convert_floating_point_type(T, x) === x
+            @test convert_floating_point_type(T, typeof(x)) === typeof(x)
+        end
+    end
+    let u = u"km/s"
+        @test convert_floating_point_type(Int16, typeof(one(Int32)*u)) === typeof(float(one(Int16))*u)
+        @test convert_floating_point_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(float(one(Complex{Int16}))*u)
+        @test convert_floating_point_type(Complex{Int16}, typeof(one(Int32)*u)) === typeof(float(one(Int16))*u)
+        @test convert_floating_point_type(Complex{Int16}, typeof(one(Complex{Int32})*u)) === typeof(float(one(Complex{Int16}))*u)
     end
 
     # unitless
