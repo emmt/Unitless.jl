@@ -128,6 +128,8 @@ non-standard numeric type.
 
 """
 convert_bare_type(::Type{T}, x) where {T<:Number} = convert_bare_type(bare_type(T), x)
+
+# NOTE: All other specializations of `convert_bare_type(T,x)` are for `T<:BareNumber`.
 convert_bare_type(::Type{T}, x::T) where {T<:BareNumber} = x
 convert_bare_type(::Type{T}, x::BareNumber) where {T<:BareNumber} = convert(T, x)
 convert_bare_type(::Type{T}, x) where {T<:BareNumber} = error(
@@ -153,8 +155,9 @@ type.
 
 """
 convert_real_type(::Type{T}, x) where {T<:Number} = convert_real_type(real_type(T), x)
+
+# NOTE: All other specializations of `convert_real_type(T,x)` are for `T<:Real`.
 convert_real_type(::Type{T}, x::T) where {T<:Real} = x
-convert_real_type(::Type{T}, x::T) where {T<:Complex} = x
 convert_real_type(::Type{T}, x::Complex{T}) where {T<:Real} = x
 convert_real_type(::Type{T}, x::Real) where {T<:Real} = convert(T, x)
 convert_real_type(::Type{T}, x::Complex) where {T<:Real} = convert(Complex{T}, x)
