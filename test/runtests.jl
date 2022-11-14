@@ -225,6 +225,12 @@ end
     @test convert_bare_type(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_bare_type(Int, u"2.0m/s") === u"2m/s"
     @test convert_bare_type(Float32, u"35GHz") === u"35.0f0GHz"
+    let T = typeof(u"3.5GHz")
+        for x in (missing, nothing, undef)
+            @test convert_bare_type(T, x) === x
+            @test convert_bare_type(T, typeof(x)) === typeof(x)
+        end
+    end
     let u = u"km/s"
         @test convert_bare_type(Int16, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
         @test convert_bare_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(one(Int16)*u)
@@ -249,6 +255,12 @@ end
     @test convert_real_type(Float64, u"2.0m/s") === u"2.0m/s"
     @test convert_real_type(Int, u"2.0m/s") === u"2m/s"
     @test convert_real_type(Float32, u"35GHz") === u"35.0f0GHz"
+    let T = typeof(u"3.5GHz")
+        for x in (missing, nothing, undef)
+            @test convert_real_type(T, x) === x
+            @test convert_real_type(T, typeof(x)) === typeof(x)
+        end
+    end
     let u = u"km/s"
         @test convert_real_type(Int16, typeof(one(Int32)*u)) === typeof(one(Int16)*u)
         @test convert_real_type(Int16, typeof(one(Complex{Int32})*u)) === typeof(one(Complex{Int16})*u)

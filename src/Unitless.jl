@@ -170,11 +170,12 @@ convert_real_type(::Type{T}, ::Type{S}) where {T<:Real,S} = error(
     "unsupported conversion of bare real type of type `", S,"` to `", T, "`")
 
 # Special values/types.
-for f in (:convert_bare_type, :convert_real_type), x in (missing, nothing, undef)
-    T = typeof(x)
+const Untouched = Union{Missing,Nothing,typeof(undef)}
+for (func, type) in ((:convert_bare_type, :BareNumber),
+                     (:convert_real_type, :Real))
     @eval begin
-        $f(::Type{<:Real}, ::$T) = $x
-        $f(::Type{<:Real}, ::Type{$T}) = $T
+        $func(::Type{<:$type}, x::Untouched) = x
+        $func(::Type{<:$type}, T::Type{<:Untouched}) = T
     end
 end
 
