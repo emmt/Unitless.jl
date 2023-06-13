@@ -15,7 +15,9 @@ export
     real_type,
     unitless
 
-using Requires
+if !isdefined(Base, :get_extension)
+    using Requires
+end
 
 """
     Unitless.BareNumber
@@ -242,26 +244,10 @@ unitless(T::Type) = bare_type(T)
 unitless(x::BareNumber) = x
 
 function __init__()
-    # Extend methods to `Unitful` quantities when this package is loaded.
-    @require Unitful="1986cc42-f94f-5a68-af5c-568840ba703d" begin
-        # Extend bare_type, real_type, convert_bare_type, and
-        # convert_real_type.
-        for (f, g, S) in ((:bare_type, :convert_bare_type, :BareNumber),
-                          (:real_type, :convert_real_type, :Real))
-            @eval begin
-                $f(::Type{<:Unitful.AbstractQuantity{T}}) where {T} = $f(T)
-                $g(::Type{T}, x::Unitful.AbstractQuantity{T}) where {T<:$S} = x
-                @inline $g(::Type{T}, x::Unitful.AbstractQuantity) where {T<:$S} =
-                    $g(T, Unitful.ustrip(x))*Unitful.unit(x)
-                $g(::Type{T}, ::Type{Unitful.Quantity{T,D,U}}) where {T<:$S,D,U} =
-                    Unitful.Quantity{T,D,U}
-                @inline $g(::Type{T}, ::Type{Unitful.Quantity{R,D,U}}) where {T<:$S,R,D,U} =
-                    Unitful.Quantity{$g(T,R),D,U}
-            end
-        end
-
-        # Extend unitless (only needed for values).
-        unitless(x::Unitful.AbstractQuantity) = Unitful.ustrip(x)
+    @static if !isdefined(Base, :get_extension)
+        # Extend methods to `Unitful` quantities when this package is loaded.
+        @require Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d" include(
+            "../ext/UnitlessUnitfulExt.jl")
     end
 end
 
