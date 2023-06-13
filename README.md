@@ -62,7 +62,7 @@ The `Unitless` package exports a few methods:
 
 The only difference between `bare_type` and `real_type` is how they treat
 complex numbers. The former preserves the complex kind of its argument while
-the former always returns a real type. You may assume that `real_type(x) =
+the latter always returns a real type. You may assume that `real_type(x) =
 real(bare_type(x))`. Conversely, `convert_bare_type(T,x)` yields a complex
 result if `T` is complex and a real result if `T` is real whatever `x`, while
 `convert_real_type(T,x)` yields a complex result if `x` is complex and a real
@@ -142,10 +142,10 @@ end
 This latter version consistently and efficiently deals with `α` being real
 while the entries of `A` are reals or complexes, and with `α` and the entries
 of `A` being complexes. If `α` is a complex and the entries of `A` are reals,
-the statement `A[i] *= alpha` will check that the imaginary part of `α` is zero
-and will throw an `InexactConversion` if this is not the case. This check is
-probably optimized out of the loop by Julia but, to handle this with guaranteed
-no loss of efficiency, the code can be written as:
+the statement `A[i] *= alpha` will throw an `InexactConversion` if the
+imaginary part of `α` is not zero. This check is probably optimized out of the
+loop by Julia but, to handle this with guaranteed no loss of efficiency, the
+code can be written as:
 
 ```julia
 function scale!(A::AbstractArray, α::Union{Real,Complex})
@@ -181,5 +181,5 @@ created to cover this need as transparently as possible.
 
 ```julia
 using Pkg
-pkg"add Unitless"
+Pkg.add("Unitless")
 ```
