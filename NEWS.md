@@ -1,5 +1,9 @@
 # User visible changes in `Unitless`
 
+## Version 2.1.1
+
+Use Julia 1.9 package extension to deal with `Unitfull`.
+
 ## Version 2.1.0
 
 New method `convert_floating_point_type`.
