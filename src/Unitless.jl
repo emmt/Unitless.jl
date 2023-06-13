@@ -62,9 +62,8 @@ bare_type() = BareNumber
 bare_type(x::T) where {T} = bare_type(T)
 bare_type(::Type{T}) where {T<:BareNumber} = T
 bare_type(::Type{T}) where {T<:Number} = typeof(one(T))
-bare_type(T::Type) = error(
-    # NOTE: split string to avoid inlining
-    "unknown bare numeric type for `", T, "`")
+@noinline bare_type(::Type{T}) where {T} =
+    error("unknown bare numeric type for `", T, "`")
 
 """
     real_type(x) -> T <: Real
@@ -105,9 +104,7 @@ real_type(x::T) where {T} = real_type(T)
 real_type(::Type{T}) where {T<:Real} = T
 real_type(::Type{Complex{T}}) where {T<:Real} = T
 real_type(::Type{T}) where {T<:Number} = typeof(one(real(T)))
-real_type(T::Type) = error(
-    # NOTE: split string to avoid inlining
-    "unknown bare real type for `", T, "`")
+@noinline real_type(::Type{T}) where {T} = error("unknown bare real type for `", T, "`")
 
 # Multiple arguments.
 for f in (:bare_type, :real_type)
@@ -135,14 +132,12 @@ convert_bare_type(::Type{T}, x) where {T<:Number} = convert_bare_type(bare_type(
 # NOTE: All other specializations of `convert_bare_type(T,x)` are for `T<:BareNumber`.
 convert_bare_type(::Type{T}, x::T) where {T<:BareNumber} = x
 convert_bare_type(::Type{T}, x::BareNumber) where {T<:BareNumber} = convert(T, x)
-convert_bare_type(::Type{T}, x) where {T<:BareNumber} = error(
-    # NOTE: split string to avoid inlining
-    "unsupported conversion of bare numeric type of object of type `",
+@noinline convert_bare_type(::Type{T}, x) where {T<:BareNumber} = error(
+   "unsupported conversion of bare numeric type of object of type `",
     typeof(x), "` to `", T, "`")
 
 convert_bare_type(::Type{T}, ::Type{<:BareNumber}) where {T<:BareNumber} = T
-convert_bare_type(::Type{T}, ::Type{S}) where {T<:BareNumber,S} = error(
-    # NOTE: split string to avoid inlining
+@noinline convert_bare_type(::Type{T}, ::Type{S}) where {T<:BareNumber,S} = error(
     "unsupported conversion of bare numeric type of type `", S, "` to `", T, "`")
 
 """
@@ -164,24 +159,22 @@ convert_real_type(::Type{T}, x::T) where {T<:Real} = x
 convert_real_type(::Type{T}, x::Complex{T}) where {T<:Real} = x
 convert_real_type(::Type{T}, x::Real) where {T<:Real} = convert(T, x)
 convert_real_type(::Type{T}, x::Complex) where {T<:Real} = convert(Complex{T}, x)
-convert_real_type(::Type{T}, x) where {T<:Real} = error(
-    # NOTE: split string to avoid inlining
+@noinline convert_real_type(::Type{T}, x) where {T<:Real} = error(
     "unsupported conversion of bare real type of object of type `",
     typeof(x), "` to `", T, "`")
 
 convert_real_type(::Type{T}, ::Type{<:Real}) where {T<:Real} = T
 convert_real_type(::Type{T}, ::Type{<:Complex}) where {T<:Real} = Complex{T}
-convert_real_type(::Type{T}, ::Type{S}) where {T<:Real,S} = error(
-    # NOTE: split string to avoid inlining
+@noinline convert_real_type(::Type{T}, ::Type{S}) where {T<:Real,S} = error(
     "unsupported conversion of bare real type of type `", S, "` to `", T, "`")
 
 # Special values/types.
-const Untouched = Union{Missing,Nothing,typeof(undef)}
+const Special = Union{Missing,Nothing,typeof(undef)}
 for (func, type) in ((:convert_bare_type, :BareNumber),
                      (:convert_real_type, :Real))
     @eval begin
-        $func(::Type{<:$type}, x::Untouched) = x
-        $func(::Type{<:$type}, T::Type{<:Untouched}) = T
+        $func(::Type{<:$type}, x::Special) = x
+        $func(::Type{<:$type}, ::Type{T}) where {T<:Special} = T
     end
 end
 
