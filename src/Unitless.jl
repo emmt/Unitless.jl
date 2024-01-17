@@ -55,7 +55,7 @@ yields the promoted bare numeric type of `args...`.
     bare_type() -> Unitless.BareNumber
 
 yields the union of bare numeric types that may be returned by `bare_type` when
-called with at least one argument.
+called with no arguments.
 
 """
 bare_type() = BareNumber
@@ -96,7 +96,7 @@ yields the promoted bare real type of `args...`.
     real_type() -> Real
 
 yields the supertype of the types that may be returned by `real_type` when
-called with at least one argument.
+called with no arguments.
 
 """
 real_type() = Real
@@ -201,7 +201,7 @@ Also see [`real_type`](@ref) and [`convert_real_type`](@ref).
     floating_point_type() -> AbstractFloat
 
 yields the supertype of the types that may be returned by `floating_point_type`
-when called with at least one argument.
+when called with no arguments.
 
 """
 floating_point_type() = AbstractFloat
