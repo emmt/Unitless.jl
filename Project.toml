@@ -1,7 +1,7 @@
 name = "Unitless"
 uuid = "c904d999-9673-4878-a3dd-e3ef1851788a"
 authors = ["Éric Thiébaut <eric.thiebaut@univ-lyon1.fr> and contributors"]
-version = "2.1.1"
+version = "2.2.0"
 
 [deps]
 TypeUtils = "c3b1956e-8857-4d84-9b79-890df85b1e67"
