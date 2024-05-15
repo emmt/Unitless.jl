@@ -2,6 +2,10 @@
 
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](./LICENSE.md) [![Build Status](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/emmt/Unitless.jl/actions/workflows/CI.yml?query=branch%3Amain) [![Build Status](https://ci.appveyor.com/api/projects/status/github/emmt/Unitless.jl?svg=true)](https://ci.appveyor.com/project/emmt/Unitless-jl) [![Coverage](https://codecov.io/gh/emmt/Unitless.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/emmt/Unitless.jl)
 
+`Unitless` is now completely superseded by
+[`TypeUtils`](https://github.com/emmt/TypeUtils.jl) and only exists for
+backward compatibility.
+
 `Unitless` is a small [Julia](https://julialang.org/) package to facilitate
 coding with numbers whether they have units or not. The package provides
 methods to strip units from numbers or numeric types, convert the numeric type

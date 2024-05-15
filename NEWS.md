@@ -1,5 +1,11 @@
 # User visible changes in `Unitless`
 
+## Version 2.2.0
+
+`Unitless` is now completely superseded by
+[`TypeUtils`](https://github.com/emmt/TypeUtils.jl) and only exists for
+backward compatibility.
+
 ## Version 2.1.1
 
 Use Julia 1.9 package extension to deal with `Unitfull`.
