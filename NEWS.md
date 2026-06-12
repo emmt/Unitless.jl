@@ -1,5 +1,11 @@
 # User visible changes in `Unitless`
 
+## Version 2.2.1 (2025-06-11)
+
+### Fixed
+
+Bump compatibility version for `TypeUtils` ≥ 2.
+
 ## Version 2.2.0
 
 `Unitless` is now completely superseded by
